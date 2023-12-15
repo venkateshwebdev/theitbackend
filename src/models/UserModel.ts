@@ -13,4 +13,12 @@ export default class User extends Model<User> {
 
   @Column(DataType.ARRAY(DataType.STRING))
   hobbies!: string[];
+
+  static async getUsersByIds(userIds: number[]): Promise<User[]> {
+    return this.findAll({
+      where: {
+        id: userIds,
+      },
+    });
+  }
 }
