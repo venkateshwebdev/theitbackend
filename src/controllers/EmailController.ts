@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import User from "../models/UserModel";
 import nodemailer from "nodemailer";
+import { EMAIL_STYLE_BLOCK, populateTableRows } from "../utils";
 
+/** Endpoint to send selected rows to the requested emal */
 export const sendEmailToUsers = async (req: Request, res: Response) => {
   try {
     const { selectedIds, toEmail } = req.body;
@@ -26,126 +28,40 @@ export const sendEmailToUsers = async (req: Request, res: Response) => {
     // Construct the email body using user data
     const emailBody = `
     <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    h2 {
-      color: #333;
-      text-align: center;
-    }
-
-    table {
-      font-family: Arial, sans-serif;
-      border-collapse: collapse;
-      width: 80%;
-      margin: 20px auto;
-      background-color: #fff;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
-    tr:hover {
-      background-color: #f5f5f5;
-    }
-
-    p {
-      text-align: center;
-      margin-top: 20px;
-      color: #555;
-    }
-
-    h3 {
-      text-align: center;
-      color: #3498db;
-    }
-
-    .hobby-list {
-        max-height: 80px;
-      max-width: 300px;
-        overflow: scroll;
-    }
-  </style>
-</head>
-
-<body>
-  <h2>Here is the requested data</h2>
-  <table>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Phone Number</th>
-      <th>Hobbies</th>
-    </tr>
-    ${users
-      .map(
-        (user) =>
-          `<tr>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
-            <td>${user.phone}</td>
-            <td>
-            <div  class="hobby-list">${
-              user.hobbies ? user.hobbies.join(", ") : ""
-            }
-            </div></td>
-          </tr>`
-      )
-      .join("")}
-  </table>
- 
-  <h3>Venkatesh Sirigineedi</h3>
-</body>
-
-</html>
-
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ${EMAIL_STYLE_BLOCK}
+    </head>
+    <body>
+    <h2>Here is the requested data</h2>
+    ${populateTableRows(users)}
+    <h3>Venkatesh Sirigineedi</h3>
+    </body>
+    </html>
   `;
 
-    // Send email using nodemailer (update the transporter details)
+    // Send email using nodemailer
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
       auth: {
-        user: process.env.EMAIL, // Replace with your email
-        pass: process.env.EMAIL_PASSWORD, // Replace with your email password
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
     const mailOptions = {
-      from: process.env.EMAIL, // Replace with your email
+      from: process.env.EMAIL,
       to: email,
       subject: "Requested User Data:: [Venkatesh Sirigineedi]",
       html: emailBody,
     };
 
+    // send email.
     await transporter.sendMail(mailOptions);
 
     res.json({ message: "Email sent successfully" });
