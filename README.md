@@ -14,7 +14,7 @@ Supported apis
 
 /api/users/:id /DELETE  - Delete a user
 
-/api/email /POST  -  Send selected rows in email
+/api/users/email /POST  -  Send selected rows in email
 
 
 How to setup locally.
