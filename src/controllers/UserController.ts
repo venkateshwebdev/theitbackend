@@ -6,7 +6,9 @@ import { UniqueConstraintError } from "sequelize";
 export const getUsers = async (_req: Request, res: Response) => {
   try {
     // load all users.
-    const users = await User.findAll();
+    const users = await User.findAll({
+      order: [["id", "DESC"]],
+    });
     res.json(users);
   } catch (error) {
     console.error(error);
